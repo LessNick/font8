@@ -77,7 +77,7 @@ PixelEditor = newClass(null, {
 				Math.floor((e.clientX - rect.left) / t.stepX),
 				Math.floor((e.clientY - rect.top) / t.stepY)
 			);
-			t.isMouseDown = false;			
+			t.isMouseDown = false;
 		});
 
 		t.editorCanvas.on('mousemove', function(e) {
@@ -89,7 +89,11 @@ PixelEditor = newClass(null, {
 				);
 			}
 		});
+	},
 
+	stopDraw:function() {
+		var t = this;
+		t.isMouseDown = false;
 	},
 
 	setDrawMode: function(mode) {

@@ -1,3 +1,26 @@
+function createCookie(name, value, days) {
+	var expires;
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		expires = '; expires=' + date.toGMTString();
+	} else {
+		expires = '';
+	}
+	document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=/';
+}
+
+function readCookie(name) {
+	let matches = document.cookie.match(new RegExp(
+		"(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+	));
+	return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function eraseCookie(name) {
+	document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent('') + '; max-age=-1; path=/';
+}
+
 /**
  * Сдвигает битмап шириной 16px и произвольной высоты на 1 пиксель.
  * @param {number[]} bitmap - Массив байтов (длина должна быть четной: 2 байта на строку).

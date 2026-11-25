@@ -27,7 +27,7 @@ AlertWindow = newClass(ModalWindow, {
 			$('.modalDimmer').on('click', function(e) {
 				t.closeWindow();
 				setTimeout( function() {
-					gEvent.fireEvent(null, t.id, 'buttonAction', {id: t.id});
+					gEvent.fireEvent(null, t.id, 'buttonAction', {caller_id: t.id, type:'cancel'});
 				}, 5);
 			});
 		}
@@ -48,14 +48,14 @@ AlertWindow = newClass(ModalWindow, {
 		t.footerDiv = t.window.find('.alertFooter');
 
 		t.addActionButtons([
-			{id: 'closeButton', type:'cancel', name: 'CLOSE', class: 'red'}
+			{id: 'closeButton', type:'cancel', name: dic['CLOSE'], class: 'red'}
 		]);
 
 		document.addEventListener('keyup', function(e) {
 			if (e.key == 'Escape') {
 				t.closeWindow();
 				setTimeout( function() {
-					gEvent.fireEvent(null, t.id, 'buttonAction', {id: t.id});
+					gEvent.fireEvent(null, t.id, 'buttonAction', {caller_id: t.id, type:'cancel'});
 				}, 5);
 			}
 		}, true);

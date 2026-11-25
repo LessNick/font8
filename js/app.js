@@ -17,6 +17,23 @@ var chars = {
 	c64: '@ABCDEFGHIJKLMNOPQRTSUVWXYZ[£]↑← !"#$%&\'()*+,-./0123456789:;<=>?─♠│����������\\/��•�♥��⨯○♣�♦�������������������������������������@ABCDEFGHIJKLMNOPQRTSUVWXYZ[£]↑← !"#$%&\'()*+,-./0123456789:;<=>?─♠│����������\\/��•�♥��⨯○♣�♦�������������������������������������'
 }
 
+var dics = {
+	'EN': {...dic_EN},
+	'RU': {...dic_RU},
+	'BE': {...dic_BE}
+};
+
+var currentLang = 'EN';
+var cl = readCookie('app_lang');
+if (cl != undefined) {
+	currentLang = cl;
+} else {
+	createCookie('app_lang', currentLang, 360);
+}
+
+var dic = dics[currentLang];
+var newLang = '';
+
 AppCore = newClass(null, {
 	ver: '1.0',
 	id: '',
@@ -24,6 +41,7 @@ AppCore = newClass(null, {
 	workFileName: 'NoName.fnt',
 	workspaceId: '',
 	workspace: undefined,
+	langs: undefined,
 	toolbar: undefined,
 	editorLeft: undefined,
 	editorCenter: undefined,
@@ -55,11 +73,14 @@ AppCore = newClass(null, {
 		t.workspaceId = workspaceId;
 		t.title = title;
 		t.workspace = $('#' + t.workspaceId);
+		// t.workspace.append('<div class="lang flag-right">English</div>');
+		// t.workspace.append('<div class="langs"></div>');
 		t.workspace.append('<div class="winHeader noselect"><div class="winTitleBg"></div><div class="winTitle">' + t.title + '</div></div>');
-		t.workspace.append('<div class="winFooter noselect">Ready</div>');
+		t.workspace.append('<div class="winFooter noselect">' + dic['Ready'] + '</div>');
 
 		t.winFooter = $('.winFooter');
 
+		t.langs = undefined;
 		t.toolbar = undefined;
 		t.editorLeft = undefined;
 		t.editorCenter = undefined;
@@ -83,6 +104,36 @@ AppCore = newClass(null, {
 
 	start: function() {
 		var t = this;
+
+		t.langs = new Langs('appLangs', t.workspace);
+		t.langs.addLang('EN', 'EN', 'English', '', true);
+		t.langs.addLang('RU', 'RU', 'Русский язык', '');
+		t.langs.addLang('BE', 'BE', 'Беларуская мова', '');
+
+		gEvent.addListener('appLangs', 'langSwitch', function(e, args) {			
+			// console.log(args.id + ' ' + args.name);
+			newLang = args.name; 
+			var id = 'QuestionWindowId';
+			var qWindow = new QuestionWindow(
+				id,
+				dic['Warning'] + '!',
+				dic['Changing the language requires restarting the application. All unsaved data will be lost!'],
+				$('body')
+			);
+			gEvent.removeListener(id, 'buttonAction');
+			gEvent.addListener(id, 'buttonAction', function(e, args) {
+				gEvent.removeListener(args.caller_id, 'buttonAction');
+				if (args.type == 'ok') {
+					// console.log(newLang);
+					createCookie('app_lang', newLang, 360);
+					window.location.reload();
+
+				} else {
+					t.langs.setActive(currentLang);
+				}
+				newLang = '';
+			});
+		}, t);
 
 		t.workspace.append('<input id="selectFile" type="file" class="hiddenElement" />');
 
@@ -115,9 +166,9 @@ AppCore = newClass(null, {
 								var charPreset = charWidth + 'x' + charHeight;
 								var charVariants =  ['8x8', '8x16', '16x16', '16x24', '16x32'];
 								if (!charVariants.includes(charPreset)) {
-									var msg = 'Detected font size (' + charWidth + 'x' + charHeight + ') not supported!\n\nAvailable variants:\n' + charVariants.join(', ');
+									var msg = dic['Detected font size'] + ' (' + charWidth + 'x' + charHeight + ') ' + dic['not supported'] + '!\n\n' + dic['Available variants'] + ':\n' + charVariants.join(', ');
 									var id = 'alertWindowId';
-									var alertWindow = new AlertWindow(id, 'Warning!', msg, $('body'));
+									var alertWindow = new AlertWindow(id, dic['Warning'] + '!', msg, $('body'));
 									gEvent.removeListener(id, 'buttonAction');
 									gEvent.addListener(id, 'buttonAction', function(e, args) {
 										gEvent.removeListener(args.caller_id, 'buttonAction');
@@ -132,7 +183,8 @@ AppCore = newClass(null, {
 					reader.readAsDataURL(file);
 				
 				} catch (error) {				
-					console.error('Ошибка чтения файла:', error);
+					var msg = dic['File read error'] + ': ' + error;
+					var alertWindow = new AlertWindow(id, dic['Error'] + '!', msg, $('body'));
 				
 				} finally {
 					t.workFileName = file.name;
@@ -142,54 +194,54 @@ AppCore = newClass(null, {
 		});
 
 		t.toolbar = new Toolbar('winToolbar', t.workspace, 24);
-		t.toolbar.addButton('newFont', 0, 'Create New Font', false);
-		t.toolbar.addButton('openFont', 1, 'Open Font file', false);
-		t.toolbar.addButton('openLib', 30, 'Open From lib', true);
-		t.toolbar.addButton('saveFont', 2, 'Save Font file', false);
-		t.toolbar.addButton('importFont', 3, 'Import from Image', false);
-		t.toolbar.addButton('exportFont', 4, 'Export to Image', false);
-		t.toolbar.addButton('exportHeader', 5, 'Export to Header', false);
-		t.toolbar.addButton('changeFormat', 6, 'Change format', false);
+		t.toolbar.addButton('newFont', 0, dic['Create New Font'], false);
+		t.toolbar.addButton('openFont', 1, dic['Open Font file'], false);
+		t.toolbar.addButton('openLib', 30, dic['Open From lib'], true);
+		t.toolbar.addButton('saveFont', 2, dic['Save Font file'], false);
+		t.toolbar.addButton('importFont', 3, dic['Import from Image'], false);
+		t.toolbar.addButton('exportFont', 4, dic['Export to Image'], false);
+		t.toolbar.addButton('exportHeader', 5, dic['Export to Header'], false);
+		t.toolbar.addButton('changeFormat', 6, dic['Change format'], false);
 		
 		t.toolbar.addPadding('padding_1', 12, true);
 		
 		t.toolbar.addButtonSwitch('changeDrawMode', [
-			['xor', 7, 'XOR mode', true],
-			['erase', 8,  'Erase only mode'],
-			['draw', 9 , 'Draw only mode']
+			['xor', 7, dic['XOR mode'], true],
+			['erase', 8,  dic['Erase only mode']],
+			['draw', 9 , dic['Draw only mode']]
 		], false);
 		
 		t.toolbar.addPadding('padding_2', 12, true);
 
-		t.toolbar.addButton('cutChar', 10, 'Cut Char', false);
-		t.toolbar.addButton('copyChar', 11, 'Copy Char', false);
-		t.toolbar.addButton('pasteChar', 12, 'Paste Char', false);
+		t.toolbar.addButton('cutChar', 10, dic['Cut Char'], false);
+		t.toolbar.addButton('copyChar', 11, dic['Copy Char'], false);
+		t.toolbar.addButton('pasteChar', 12, dic['Paste Char'], false);
 		
 		t.toolbar.addPadding('padding_3', 12, true);
 
 		t.toolbar.addButtonSwitch('changeToolsMode', [
-			['char', 13, 'Apply to a single character', true],
-			['font', 14,  'Apply to the entire font']
+			['char', 13, dic['Apply to a single character'], true],
+			['font', 14,  dic['Apply to the entire font']]
 		], false);
 
-		t.toolbar.addButton('clear', 15, 'clear', false);
-		t.toolbar.addButton('bold', 16, 'bold', false);
-		t.toolbar.addButton('italic', 17, 'Italic', false);
-		t.toolbar.addButton('future', 18, 'future', false);
-		t.toolbar.addButton('invert', 19, 'Invert', false);
-		t.toolbar.addButton('outline', 20, 'Outline', false);
-		t.toolbar.addButton('rotateCW', 21, 'Rotate Clockwise', false);
-		t.toolbar.addButton('rotateCCW', 22, 'Rotate Counter Clockwise', false);
-		t.toolbar.addButton('mirrorH', 23, 'Mirror Horizontal', false);
-		t.toolbar.addButton('mirrorV', 24, 'Mirror Vertical', false);
+		t.toolbar.addButton('clear', 15, dic['Clear'], false);
+		t.toolbar.addButton('bold', 16, dic['Bold'], false);
+		t.toolbar.addButton('italic', 17, dic['Italic'], false);
+		t.toolbar.addButton('futuric', 18, dic['Futuric'], false);
+		t.toolbar.addButton('invert', 19, dic['Invert'], false);
+		t.toolbar.addButton('outline', 20, dic['Outline'], false);
+		t.toolbar.addButton('rotateCW', 21, dic['Rotate Clockwise'], false);
+		t.toolbar.addButton('rotateCCW', 22, dic['Rotate Counter Clockwise'], false);
+		t.toolbar.addButton('mirrorH', 23, dic['Mirror Horizontal'], false);
+		t.toolbar.addButton('mirrorV', 24, dic['Mirror Vertical'], false);
 		
 		t.toolbar.addPadding('padding_4', 10);
-		t.toolbar.addButtonPush('shiftMode', 25, 'Switch shift to Cycle Mode', 'Switch shift to Single Mode', false, false);
+		t.toolbar.addButtonPush('shiftMode', 25, dic['Switch shift to Cycle Mode'], dic['Switch shift to Single Mode'], false, false);
 		
-		t.toolbar.addButton('shiftLeft', 26, 'Shift Left', false);
-		t.toolbar.addButton('shiftDown', 27, 'Shift Down', false);
-		t.toolbar.addButton('shiftUp', 28, 'Shift Up', false);
-		t.toolbar.addButton('shiftRight', 29, 'Shift Right', false);
+		t.toolbar.addButton('shiftLeft', 26, dic['Shift Left'], false);
+		t.toolbar.addButton('shiftDown', 27, dic['Shift Down'], false);
+		t.toolbar.addButton('shiftUp', 28, dic['Shift Up'], false);
+		t.toolbar.addButton('shiftRight', 29, dic['Shift Right'], false);
 		
 		// t.toolbar.addButton('calcFont', 0, 'Calc Font', false);
 
@@ -204,6 +256,12 @@ AppCore = newClass(null, {
 		t.editorCenter = new PixelEditor('editorCenter', editorsDiv, t.fontWidth, t.fontHeight, '#fff', true);
 		t.editorRight = new PixelEditor('editorRight', editorsDiv, t.fontWidth, t.fontHeight, '#f1f0f0');
 		t.workspace.append('<div class="middleSelectorDown"></div>');
+
+		t.workspace.on('mouseover', function() {
+			t.editorLeft.stopDraw();
+			t.editorCenter.stopDraw();
+			t.editorRight.stopDraw();
+		});
 
 		t.currentChar = 0;
 		t.fontShow = new FontShow('fontShow', t.workspace, workFont, t.fontWidth, t.fontHeight, '#f1f0f0', '#f5f5f5', t.currentChar);
@@ -234,7 +292,7 @@ AppCore = newClass(null, {
 
 		$('body').on('click',  function(e) {
 			if (e.target === document.body) {
-				var alertWindow = new AlertWindow('alertWindowId', 'Information', 'Font Online Editor v' + t.ver + '\nby\nbreeze\\fishbone crew', $('body'));
+				var alertWindow = new AlertWindow('alertWindowId', dic['Information'], 'Font Online Editor v' + t.ver + '\nby\nbreeze\\fishbone crew', $('body'));
 			}
 		});
 	},
@@ -267,7 +325,7 @@ AppCore = newClass(null, {
 				selChar = chars.c64.charAt(selPos);
 				break;
 		};
-		t.winFooter.html(t.workFileName + ' | ' + t.fontWidth + 'x' + t.fontHeight+' | ' + t.fontType + ' | «<span class="charPreview">' + selChar +'</span>» ' + selCode + ' (' + selHex + ') at ' + selPos);
+		t.winFooter.html(t.workFileName + ' | ' + t.fontWidth + 'x' + t.fontHeight+' | ' + t.fontType + ' | «<span class="charPreview">' + selChar +'</span>» ' + selCode + ' (' + selHex + ') ' + dic['at'] + ' ' + selPos);
 	},
 
 	updateSelectedChar: function(charPos) {
@@ -322,8 +380,8 @@ AppCore = newClass(null, {
 				var id = 'alertWindowId';
 				var alertWindow = new AlertWindow(
 					id,
-					'Warning!',
-					'Since not all platforms share the same character set, only characters with the same appearance (or meaning) are converted; the rest are replaced by a question mark.',
+					dic['Warning'] + '!',
+					dic['Since not all platforms share the same character set, only characters with the same appearance (or meaning) are converted; the rest are replaced by a question mark.'],
 					$('body')
 				);
 				gEvent.removeListener(id, 'buttonAction');
@@ -406,7 +464,7 @@ AppCore = newClass(null, {
 		var t = this;
 		var id = 'createNewFont';
 
-		t.prepareModalForFormat(id, 'Create Font', true);
+		t.prepareModalForFormat(id, dic['Create Font'], true);
 
 		gEvent.removeListener(id, 'buttonAction');
 		gEvent.addListener(id, 'buttonAction', function(e, args) {
@@ -1010,23 +1068,23 @@ AppCore = newClass(null, {
 	exportHeader: function() {
 		var t = this;
 		var id = 'exportHeaderModal';
-		t.modalWindow = new ModalWindow(id, 'Export font',  $('body'), true, true);
+		t.modalWindow = new ModalWindow(id, dic['Export font'],  $('body'), true, true);
 		t.modalWindow.addContent([	
-			{id:'legend_type', type: 'legend', text: 'Format file data'},
-			{id:'type_zx', legend: 'legend_type', value:'zx', type: 'radio', group:'type', label: 'ZX Spectrum (*.asm file)', checked: true, line: true},
-			{id:'type_atari', legend: 'legend_type', value:'atari', type: 'radio', group:'type', label: 'Atari 800 (*.asm file)', line: true},
-			{id:'type_c64', legend: 'legend_type', value:'c64', type: 'radio', group:'type', label: 'Commodore 64 (*.asm file)', line: true},
-			{id:'type_millfork', legend: 'legend_type', value:'millfork', type: 'radio', group:'type', label: 'MillFork (*.mfk file)', line: true},
-			{id:'type_js', legend: 'legend_type', value:'js', type: 'radio', group:'type', label: 'JavaScript (*.js file)', line: true},
-			{id:'type_arduino', legend: 'legend_type', value:'arduino', type: 'radio', group:'type', label: 'Arduino IDE (*.h file)', line: true},
-			{id:'type_python', legend: 'legend_type', value:'python', type: 'radio', group:'type', label: 'Python (*.py file)', line: true},
+			{id:'legend_type', type: 'legend', text: dic['Format file data']},
+			{id:'type_zx', legend: 'legend_type', value:'zx', type: 'radio', group:'type', label: 'ZX Spectrum (*.asm '+ dic['file'] + ')', checked: true, line: true},
+			{id:'type_atari', legend: 'legend_type', value:'atari', type: 'radio', group:'type', label: 'Atari 800 (*.asm '+ dic['file'] + ')', line: true},
+			{id:'type_c64', legend: 'legend_type', value:'c64', type: 'radio', group:'type', label: 'Commodore 64 (*.asm '+ dic['file'] + ')', line: true},
+			{id:'type_millfork', legend: 'legend_type', value:'millfork', type: 'radio', group:'type', label: 'MillFork (*.mfk '+ dic['file'] + ')', line: true},
+			{id:'type_js', legend: 'legend_type', value:'js', type: 'radio', group:'type', label: 'JavaScript (*.js '+ dic['file'] + ')', line: true},
+			{id:'type_arduino', legend: 'legend_type', value:'arduino', type: 'radio', group:'type', label: 'Arduino IDE (*.h '+ dic['file'] + ')', line: true},
+			{id:'type_python', legend: 'legend_type', value:'python', type: 'radio', group:'type', label: 'Python (*.py '+ dic['file'] + ')', line: true},
 
-			{id:'inc_sizes', name:'inc_sizes', value:'true', type: 'checkbox', label: 'Including a table of character sizes', checked: true, line: true}
+			{id:'inc_sizes', name:'inc_sizes', value:'true', type: 'checkbox', label: dic['Including a table of character sizes'], checked: true, line: true}
 		]);
 
 		t.modalWindow.addActionButtons([
-			{id: 'okButton', type:'ok', name: 'OK', class: 'green'},
-			{id: 'cancelButton', type:'cancel', name: 'CANCEL', class: 'red'},
+			{id: 'okButton', type:'ok', name: dic['OK'], class: 'green'},
+			{id: 'cancelButton', type:'cancel', name: dic['CANCEL'], class: 'red'},
 		]);
 
 		gEvent.removeListener(id, 'buttonAction');
@@ -1221,7 +1279,7 @@ AppCore = newClass(null, {
 	importImage: function(img, charPreset) {
 		var t = this;
 		var id = 'newImportModal';
-		t.prepareModalForFormat(id, 'Import image ' + img.width + 'x' + img.height + 'px');
+		t.prepareModalForFormat(id, dic['Import image'] + ' ' + img.width + 'x' + img.height + 'px');
 		t.setModalFofAll();
 
 		t.modalWindow.chooseContent('size_' + charPreset);
@@ -1266,32 +1324,32 @@ AppCore = newClass(null, {
 
 		t.modalWindow = new ModalWindow(id, title,  $('body'), true, true);
 		var content = [
-			{id:'legend_size', type: 'legend', text: 'Choose Font Size'},
+			{id:'legend_size', type: 'legend', text: dic['Choose Font Size']},
 			{id:'size_8x8', legend: 'legend_size', value:'8x8', type: 'radio', group:'size', label: '8x8', checked: true,},
 			{id:'size_8x16', legend: 'legend_size', value:'8x16', type: 'radio', group:'size', label: '8x16', disabled: true},
 			{id:'size_16x16', legend: 'legend_size', value:'16x16', type: 'radio', group:'size', label: '16x16', disabled: true},
 			{id:'size_16x24', legend: 'legend_size', value:'16x24', type: 'radio', group:'size', label: '16x24', disabled: true},
 			{id:'size_16x32', legend: 'legend_size', value:'16x32', type: 'radio', group:'size', label: '16x32', disabled: true},
 			
-			{id:'legend_amount', type: 'legend', text: 'Choose amount font chars'},
-			{id:'chars_96', legend: 'legend_amount', value:'96', type: 'radio', group:'amount', label: '96 chars', checked: true,},
-			{id:'chars_128', legend: 'legend_amount', value:'128', type: 'radio', group:'amount', label: '128 chars', disabled: true},
-			{id:'chars_256', legend: 'legend_amount', value:'256', type: 'radio', group:'amount', label: '256 chars'},
+			{id:'legend_amount', type: 'legend', text: dic['Choose amount font chars']},
+			{id:'chars_96', legend: 'legend_amount', value:'96', type: 'radio', group:'amount', label: '96 ' + dic['chars'], checked: true,},
+			{id:'chars_128', legend: 'legend_amount', value:'128', type: 'radio', group:'amount', label: '128 ' + dic['chars'], disabled: true},
+			{id:'chars_256', legend: 'legend_amount', value:'256', type: 'radio', group:'amount', label: '256 ' + dic['chars']},
 			
-			{id:'legend_codepage', type: 'legend', text: 'Choose font codepage'},
+			{id:'legend_codepage', type: 'legend', text: dic['Choose font codepage']},
 			{id:'cp_zx', legend: 'legend_codepage', value:'zx', type: 'radio', group:'codepage', label: 'ZX Spectrum', checked: true, line: true},
 			{id:'cp_atari', legend: 'legend_codepage', value:'atari', type: 'radio', group:'codepage', label: 'Atari 800', line: true},
 			{id:'cp_c64', legend: 'legend_codepage', value:'c64', type: 'radio', group:'codepage', label: 'Commodore 64', line: true},
 			{id:'cp_ibm', legend: 'legend_codepage', value:'ibm', type: 'radio', group:'codepage', label: 'IBM DOS', line: true},
 		];
 		if (noUnknown == false) {
-			content.push({id:'cp_arbitrary', legend: 'legend_codepage', value:'arbitrary', type: 'radio', group:'codepage', label: 'Arbitrary (Unknown)', line: true})
+			content.push({id:'cp_arbitrary', legend: 'legend_codepage', value:'arbitrary', type: 'radio', group:'codepage', label: dic['Arbitrary (Unknown)'], line: true})
 		}
 
 		t.modalWindow.addContent(content);
 		t.modalWindow.addActionButtons([
-			{id: 'okButton', type:'ok', name: 'OK', class: 'green'},
-			{id: 'cancelButton', type:'cancel', name: 'CANCEL', class: 'red'},
+			{id: 'okButton', type:'ok', name: dic['OK'], class: 'green'},
+			{id: 'cancelButton', type:'cancel', name: dic['CANCEL'], class: 'red'},
 		]);
 
 		gEvent.removeListener(id, 'formChanged');
@@ -1325,15 +1383,15 @@ AppCore = newClass(null, {
 	showFormatConverter: function() {
 		var t = this;
 		var id = 'formatConverter';
-		t.modalWindow = new ModalWindow(id, 'Format Converter',  $('body'), true, true);
+		t.modalWindow = new ModalWindow(id, dic['Format Converter'],  $('body'), true, true);
 		t.modalWindow.addContent([	
-			{id:'legend_source', type: 'legend', text: 'From Source codepage'},
+			{id:'legend_source', type: 'legend', text: dic['From Source codepage']},
 			{id:'src_zx', legend: 'legend_source', value:'zx', type: 'radio', group:'source', label: 'ZX Spectrum', checked: true, line: true},
 			{id:'src_atari', legend: 'legend_source', value:'atari', type: 'radio', group:'source', label: 'Atari 800', line: true},
 			{id:'src_c64', legend: 'legend_source', value:'c64', type: 'radio', group:'source', label: 'Commodore 64', line: true},
 			{id:'src_ibm', legend: 'legend_source', value:'ibm', type: 'radio', group:'source', label: 'IBM DOS', line: true},
 
-			{id:'legend_destination', type: 'legend', text: 'To Destination codepage'},
+			{id:'legend_destination', type: 'legend', text: dic['To Destination codepage']},
 			{id:'dst_zx', legend: 'legend_destination', value:'zx', type: 'radio', group:'destination', label: 'ZX Spectrum', checked: true, line: true},
 			{id:'dst_atari', legend: 'legend_destination', value:'atari', type: 'radio', group:'destination', label: 'Atari 800', line: true},
 			{id:'dst_c64', legend: 'legend_destination', value:'c64', type: 'radio', group:'destination', label: 'Commodore 64', line: true},
@@ -1342,8 +1400,8 @@ AppCore = newClass(null, {
 		]);
 
 		t.modalWindow.addActionButtons([
-			{id: 'okButton', type:'ok', name: 'OK', class: 'green'},
-			{id: 'cancelButton', type:'cancel', name: 'CANCEL', class: 'red'},
+			{id: 'okButton', type:'ok', name: dic['OK'], class: 'green'},
+			{id: 'cancelButton', type:'cancel', name: dic['CANCEL'], class: 'red'},
 		]);
 
 		t.modalWindow.chooseContent('src_' + t.fontType.toLowerCase());
@@ -1359,8 +1417,8 @@ AppCore = newClass(null, {
 				if (source == destination) {
 					var alertWindow = new AlertWindow(
 						id,
-						'Woow!',
-						'OK, very funny. Now close the window.',
+						dic['Woow'] + '!',
+						dic['OK, very funny. Now close the window.'],
 						$('body')
 					);
 				} else {

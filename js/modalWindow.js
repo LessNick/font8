@@ -32,7 +32,7 @@ ModalWindow = newClass(null, {
 					t.closeWindow();
 				};
 				setTimeout( function() {
-					gEvent.fireEvent(null, t.id, 'buttonAction', {id: t.id});
+					gEvent.fireEvent(null, t.id, 'buttonAction', {caller_id: t.id, type:'cancel'});
 				}, 5);
 			});
 		}
@@ -49,7 +49,7 @@ ModalWindow = newClass(null, {
 			if (e.key == 'Escape') {
 				t.closeWindow();
 				setTimeout( function() {
-					gEvent.fireEvent(null, t.id, 'buttonAction', {id: t.id});
+					gEvent.fireEvent(null, t.id, 'buttonAction', {caller_id: t.id, type:'cancel'});
 				}, 5);
 			}
 		}, true);
