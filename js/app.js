@@ -106,9 +106,9 @@ AppCore = newClass(null, {
 		var t = this;
 
 		t.langs = new Langs('appLangs', t.workspace);
-		t.langs.addLang('EN', 'EN', 'English', '', true);
-		t.langs.addLang('RU', 'RU', 'Русский язык', '');
-		t.langs.addLang('BE', 'BE', 'Беларуская мова', '');
+		t.langs.addLang('EN', 'EN', 'English', '', currentLang == 'EN');
+		t.langs.addLang('RU', 'RU', 'Русский язык', '', currentLang == 'RU');
+		t.langs.addLang('BE', 'BE', 'Беларуская мова', '', currentLang == 'BE');
 
 		gEvent.addListener('appLangs', 'langSwitch', function(e, args) {			
 			// console.log(args.id + ' ' + args.name);
