@@ -292,7 +292,7 @@ AppCore = newClass(null, {
 
 		$('body').on('click',  function(e) {
 			if (e.target === document.body) {
-				var alertWindow = new AlertWindow('alertWindowId', dic['Information'], 'Font Online Editor v' + t.ver + '\nby\nbreeze\\fishbone crew', $('body'));
+				var alertWindow = new AlertWindow('alertWindowId', 'Information', 'Font Online Editor v' + t.ver + '\nby\nbreeze\\fishbone crew', $('body'));
 			}
 		});
 	},
@@ -380,7 +380,7 @@ AppCore = newClass(null, {
 				var id = 'alertWindowId';
 				var alertWindow = new AlertWindow(
 					id,
-					dic['Warning'] + '!',
+					'Warning!',
 					dic['Since not all platforms share the same character set, only characters with the same appearance (or meaning) are converted; the rest are replaced by a question mark.'],
 					$('body')
 				);
@@ -464,7 +464,7 @@ AppCore = newClass(null, {
 		var t = this;
 		var id = 'createNewFont';
 
-		t.prepareModalForFormat(id, dic['Create Font'], true);
+		t.prepareModalForFormat(id, 'Create Font', true);
 
 		gEvent.removeListener(id, 'buttonAction');
 		gEvent.addListener(id, 'buttonAction', function(e, args) {
@@ -1068,7 +1068,7 @@ AppCore = newClass(null, {
 	exportHeader: function() {
 		var t = this;
 		var id = 'exportHeaderModal';
-		t.modalWindow = new ModalWindow(id, dic['Export font'],  $('body'), true, true);
+		t.modalWindow = new ModalWindow(id, 'Export font',  $('body'), true, true);
 		t.modalWindow.addContent([	
 			{id:'legend_type', type: 'legend', text: dic['Format file data']},
 			{id:'type_zx', legend: 'legend_type', value:'zx', type: 'radio', group:'type', label: 'ZX Spectrum (*.asm '+ dic['file'] + ')', checked: true, line: true},
@@ -1279,7 +1279,7 @@ AppCore = newClass(null, {
 	importImage: function(img, charPreset) {
 		var t = this;
 		var id = 'newImportModal';
-		t.prepareModalForFormat(id, dic['Import image'] + ' ' + img.width + 'x' + img.height + 'px');
+		t.prepareModalForFormat(id, 'Import image ' + img.width + 'x' + img.height + 'px');
 		t.setModalFofAll();
 
 		t.modalWindow.chooseContent('size_' + charPreset);
@@ -1383,7 +1383,7 @@ AppCore = newClass(null, {
 	showFormatConverter: function() {
 		var t = this;
 		var id = 'formatConverter';
-		t.modalWindow = new ModalWindow(id, dic['Format Converter'],  $('body'), true, true);
+		t.modalWindow = new ModalWindow(id, 'Format Converter',  $('body'), true, true);
 		t.modalWindow.addContent([	
 			{id:'legend_source', type: 'legend', text: dic['From Source codepage']},
 			{id:'src_zx', legend: 'legend_source', value:'zx', type: 'radio', group:'source', label: 'ZX Spectrum', checked: true, line: true},
@@ -1417,7 +1417,7 @@ AppCore = newClass(null, {
 				if (source == destination) {
 					var alertWindow = new AlertWindow(
 						id,
-						dic['Woow'] + '!',
+						'Woow!',
 						dic['OK, very funny. Now close the window.'],
 						$('body')
 					);
