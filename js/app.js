@@ -167,7 +167,9 @@ AppCore = newClass(null, {
 								var charHeight = img.height / 16;
 								var charPreset = charWidth + 'x' + charHeight;
 								var charVariants =  ['8x8', '8x16', '16x16', '16x24', '16x32'];
-								if (!charVariants.includes(charPreset)) {
+								if (charVariants.includes(charPreset)) {
+									t.importImage(img, charPreset);
+								} else {
 									var msg = dic['Detected font size'] + ' (' + charWidth + 'x' + charHeight + ') ' + dic['not supported'] + '!\n\n' + dic['Available variants'] + ':\n' + charVariants.join(', ');
 									var id = 'alertWindowId';
 									var alertWindow = new AlertWindow(id, dic['Warning'] + '!', msg, $('body'));
