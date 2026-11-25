@@ -112,27 +112,29 @@ AppCore = newClass(null, {
 
 		gEvent.addListener('appLangs', 'langSwitch', function(e, args) {			
 			// console.log(args.id + ' ' + args.name);
-			newLang = args.name; 
-			var id = 'QuestionWindowId';
-			var qWindow = new QuestionWindow(
-				id,
-				'Warning!',
-				dic['Changing the language requires restarting the application. All unsaved data will be lost!'],
-				$('body')
-			);
-			gEvent.removeListener(id, 'buttonAction');
-			gEvent.addListener(id, 'buttonAction', function(e, args) {
-				gEvent.removeListener(args.caller_id, 'buttonAction');
-				if (args.type == 'ok') {
-					// console.log(newLang);
-					createCookie('app_lang', newLang, 360);
-					window.location.reload();
+			if (args.name != currentLang) {
+				newLang = args.name; 
+				var id = 'QuestionWindowId';
+				var qWindow = new QuestionWindow(
+					id,
+					'Warning!',
+					dic['Changing the language requires restarting the application. All unsaved data will be lost!'],
+					$('body')
+				);
+				gEvent.removeListener(id, 'buttonAction');
+				gEvent.addListener(id, 'buttonAction', function(e, args) {
+					gEvent.removeListener(args.caller_id, 'buttonAction');
+					if (args.type == 'ok') {
+						// console.log(newLang);
+						createCookie('app_lang', newLang, 360);
+						window.location.reload();
 
-				} else {
-					t.langs.setActive(currentLang);
-				}
-				newLang = '';
-			});
+					} else {
+						t.langs.setActive(currentLang);
+					}
+					newLang = '';
+				});
+			}
 		}, t);
 
 		t.workspace.append('<input id="selectFile" type="file" class="hiddenElement" />');
