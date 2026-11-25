@@ -116,7 +116,7 @@ AppCore = newClass(null, {
 			var id = 'QuestionWindowId';
 			var qWindow = new QuestionWindow(
 				id,
-				dic['Warning'] + '!',
+				'Warning!',
 				dic['Changing the language requires restarting the application. All unsaved data will be lost!'],
 				$('body')
 			);
